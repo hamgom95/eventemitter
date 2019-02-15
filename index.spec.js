@@ -1,150 +1,115 @@
 const test = require("tape");
 const EventEmitter = require("./index");
 
-test("EventEmitter", (t) => {
+const withEmitter = (fn) => (t) => fn(t, new EventEmitter());
 
-    const noop = () => {};
-    const name = "a";
+const eventName = "a";
+const noopListener = () => { };
+const argsListener = (t, ...expectedArgs) => (...actualArgs) => {
+    t.pass("Listener executed");
+    if (expectedArgs.length > 0) t.deepEqual(expectedArgs, actualArgs, "Passed event arguments not matching");
+};
 
-    t.test("#off(event, listener)", (t) => {
+
+test("#off(event, listener)", withEmitter((t, e) => {
+    t.plan(1);
+    const listener = argsListener(t);
+    e.on(eventName, listener);
+    e.emit(eventName);
+    e.off(eventName, listener);
+    e.emit(eventName);
+}));
+
+test("const off = #on", withEmitter((t, e) => {
+    t.plan(1);
+
+    const off = e.on(eventName, argsListener(t));
+
+    e.emit(eventName);
+    off();
+    e.emit(eventName);
+}));
+
+test("#on", (t) => {
+
+    t.test("{}", withEmitter((t, e) => {
+        t.plan(4);
+
+        const msg = "test";
+
+        e.on(eventName, argsListener(t, msg));
+
+        e.emit(eventName, msg);
+        e.emit(eventName, msg);
+
+    }));
+
+    t.test("{once: true}", withEmitter((t, e) => {
+        // check that listener is called only once
         t.plan(1);
 
-        const e = new EventEmitter();
-        const listener = () => {
-            t.pass("Listener executed");
-        };
+        e.on(eventName, argsListener(t), { once: true });
 
-        e.on(name, listener);
+        e.emit(eventName);
+        e.emit(eventName);
+    }));
 
-        e.emit(name);
-        e.off(name, listener);
-        e.emit(name);
-    });
+    t.test("{prepend: true}", withEmitter((t, e) => {
+        // check that listener is called only once
+        t.plan(2);
 
-    t.test("const off = #on", (t) => {
-        t.plan(1);
-
-        const e = new EventEmitter();
-
-        const off = e.on(name, () => {
-            t.pass("Listener executed");
+        let counter = 0;
+        e.on(eventName, () => {
+            t.equal(counter, 1, "counter should be incremented by prepended listener");
         });
+        e.on(eventName, () => {
+            t.equal(counter, 0, "zero because prepended");
+            counter++;
 
-        e.emit(name);
-        off();
-        e.emit(name);
-    });
+        }, { prepend: true });
 
-    t.test("#on", (t) => {
+        e.emit(eventName);
+    }));
 
-        t.test("{}", (t) => {
-            t.plan(4);
-
-            const e = new EventEmitter();
-            const msg = "test";
-
-            e.on(name, (a1) => {
-                t.pass("Listener executed");
-                t.equal(a1, msg, "Arguments should be equal");
-            });
-
-            e.emit(name, msg);
-            e.emit(name, msg);
-
-        });
-
-        t.test("{once: true}", (t) => {
-            // check that listener is called only once
-            t.plan(1);
-    
-            const e = new EventEmitter();
-    
-            e.on(name, () => {
-                t.pass("Listener executed");
-            }, {once: true});
-    
-            e.emit(name);
-            e.emit(name);
-        });
-
-        t.test("{prepend: true}", (t) => {
-            // check that listener is called only once
-            t.plan(2);
-    
-            let counter = 0;
-            const e = new EventEmitter();
-    
-            e.on(name, () => {
-                t.equal(counter, 1, "counter should be incremented by prepended listener");
-            });
-            e.on(name, () => {
-                t.equal(counter, 0, "zero because prepended");
-                counter++;
-
-            }, {prepend: true});
-
-            e.emit(name);
-        });    
-        
-    });
-
-    t.test("event:error", (t) => {
-
-        t.test("default handler", (t) => {
-            t.plan(4);
-
-            const e = new EventEmitter();
-
-            try {
-                e.emit("error");
-            } catch (e) {
-                t.pass("should throw error");
-                t.assert(e instanceof TypeError, "should use TypeError by default");
-                t.equal(e.message, "Uncaught, unspecified \"error\" event.", "should match default error message");
-            }
-
-            t.throws(() => e.emit("error", new Error("test message")), /test message/, "throws passed error");
-        });
-    
-        t.test("registered listener", (t) => {
-            const e = new EventEmitter();
-    
-            e.on("error", noop);
-            t.doesNotThrow(() => e.emit("error"), "registered listener disables throwing error");
-            
-            t.end();
-        });
-
-    });
-
-    t.test("event:newListener", (t) => {
-
-        t.plan(3);
-
-        const e = new EventEmitter();
-
-        e.on("newListener", (event, listener) => {
-            t.pass("newListener is called");
-            t.equal(event, name, "event name matches");
-            t.equal(listener, noop, "listener function matches");
-        }); 
-        e.on(name, noop);
-    });
-
-    t.test("event:removeListener", (t) => {
-
-        t.plan(3);
-
-        const e = new EventEmitter();
-
-        e.on("removeListener", (event, listener) => {
-            t.pass("removeListener is called");
-            t.equal(event, name, "event name matches");
-            t.equal(listener, noop, "listener function matches");
-        }); 
-        const off = e.on(name, noop);
-        off();
-    });
-
-    t.end();
 });
+
+test("event:error", (t) => {
+
+    t.test("default handler", withEmitter((t, e) => {
+        t.plan(4);
+
+        try {
+            e.emit("error");
+        } catch (e) {
+            t.pass("should throw error");
+            t.assert(e instanceof TypeError, "should use TypeError by default");
+            t.equal(e.message, "Uncaught, unspecified \"error\" event.", "should match default error message");
+        }
+
+        t.throws(() => e.emit("error", new Error("test message")), /test message/, "throws passed error");
+    }));
+
+    t.test("registered listener", withEmitter((t, e) => {
+        e.on("error", noopListener);
+        t.doesNotThrow(() => e.emit("error"), "registered listener disables throwing error");
+
+        t.end();
+    }));
+
+});
+
+test("event:newListener", withEmitter((t, e) => {
+    t.plan(2);
+
+    e.on("newListener", argsListener(t, eventName, noopListener));
+    e.on(eventName, noopListener);
+}));
+
+test("event:removeListener", withEmitter((t, e) => {
+    t.plan(2);
+
+    e.on("removeListener", argsListener(t, eventName, noopListener));
+
+    const off = e.on(eventName, noopListener);
+    off();
+}));
