@@ -1,0 +1,27 @@
+{
+  "name": "@hamgom95/eventemitter",
+  "version": "0.1.0",
+  "description": "simple eventemitter implementation",
+  "main": "index.js",
+  "keywords": [
+    "event",
+    "eventemitter"
+  ],
+  "scripts": {
+    "test": "tape \"**/*.spec.js\" | tap-spec",
+    "build:readme": "jsdoc2md --heading-depth=3 --template README.tpl.md \"index.js\" > README.md",
+    "prepublish": "npm run build:readme"
+  },
+  "author": {
+    "name": "Kevin Thomas",
+    "email": "hamgom95@gmail.com"
+  },
+  "files": [
+    "index.js"
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "tap-spec": "^5.0.0",
+    "tape": "^4.10.1"
+  }
+}
