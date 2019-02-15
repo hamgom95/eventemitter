@@ -7,8 +7,12 @@ class EventEmitter {
         this.events = new Map();
     }
 
-    _errorHandler() {
-        throw TypeError('Uncaught, unspecified "error" event.');
+    _errorHandler(err) {
+        if (err) {
+            throw err;
+        } else {
+            throw TypeError('Uncaught, unspecified "error" event.');
+        }
     }
 
     _newListener(event, listener, prepend=false) {
@@ -98,7 +102,7 @@ class EventEmitter {
                 if (listener.once) this.off(event, listener);
             }
         } else if (event === "error") {
-            this._errorHandler();
+            this._errorHandler(args[0]);
         }
     }
 }

@@ -5,7 +5,6 @@ test("EventEmitter", (t) => {
 
     const noop = () => {};
     const name = "a";
-    const emitError = (emitter) => emitter.emit("error", new Error("test message"));
 
     t.test("#off(event, listener)", (t) => {
         t.plan(1);
@@ -27,7 +26,7 @@ test("EventEmitter", (t) => {
 
         const e = new EventEmitter();
 
-        const off = e.on(name, (a1) => {
+        const off = e.on(name, () => {
             t.pass("Listener executed");
         });
 
@@ -92,17 +91,26 @@ test("EventEmitter", (t) => {
     t.test("event:error", (t) => {
 
         t.test("default handler", (t) => {
+            t.plan(4);
+
             const e = new EventEmitter();
-    
-            t.throws(() => emitError(e), /Uncaught, unspecified \"error\" event/, "throws error if no listener registered");
-            t.end();
+
+            try {
+                e.emit("error");
+            } catch (e) {
+                t.pass("should throw error");
+                t.assert(e instanceof TypeError, "should use TypeError by default");
+                t.equal(e.message, "Uncaught, unspecified \"error\" event.", "should match default error message");
+            }
+
+            t.throws(() => e.emit("error", new Error("test message")), /test message/, "throws passed error");
         });
     
         t.test("registered listener", (t) => {
             const e = new EventEmitter();
     
             e.on("error", noop);
-            t.doesNotThrow(() => emitError(e), "registered listener disables throwing error");
+            t.doesNotThrow(() => e.emit("error"), "registered listener disables throwing error");
             
             t.end();
         });
