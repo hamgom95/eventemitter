@@ -8,7 +8,7 @@
     "eventemitter"
   ],
   "scripts": {
-    "test": "tape \"**/*.spec.js\" | tap-spec",
+    "test": "node index.spec.js | tap-spec",
     "build:readme": "jsdoc2md --heading-depth=3 --template README.tpl.md \"index.js\" > README.md",
     "prepublish": "npm run build:readme"
   },
