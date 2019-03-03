@@ -1,12 +1,12 @@
-# @hamgom95/eventemitter
+## @hamgom95/eventemitter
 
 Simple EventEmitter implementation.
 
-## API Documentation
+### API Documentation
 
 <a name="EventEmitter"></a>
 
-### EventEmitter
+#### EventEmitter
 Event emitter.
 
 **Kind**: global class  
@@ -24,7 +24,7 @@ Event emitter.
 
 <a name="EventEmitter+on"></a>
 
-#### eventEmitter.on(event, listener, opts)
+##### eventEmitter.on(event, listener, opts)
 Register event listener
 
 **Kind**: instance method of [<code>EventEmitter</code>](#EventEmitter)  
@@ -39,7 +39,7 @@ Register event listener
 
 <a name="EventEmitter+off"></a>
 
-#### eventEmitter.off([event], [listener])
+##### eventEmitter.off([event], [listener])
 Unregister listener.
 
 **Kind**: instance method of [<code>EventEmitter</code>](#EventEmitter)  
@@ -51,7 +51,7 @@ Unregister listener.
 
 <a name="EventEmitter+emit"></a>
 
-#### eventEmitter.emit(event, ...args)
+##### eventEmitter.emit(event, ...args)
 Emit event with arguments.
 
 **Kind**: instance method of [<code>EventEmitter</code>](#EventEmitter)  

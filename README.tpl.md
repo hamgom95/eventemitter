@@ -1,7 +1,7 @@
-# @hamgom95/eventemitter
+## @hamgom95/eventemitter
 
 Simple EventEmitter implementation.
 
-## API Documentation
+### API Documentation
 
 {{>main}}
